@@ -1,5 +1,64 @@
 pipeline {
   agent any
+  environment {
+    DOCKER_CREDENTIALS = credentials('docker-hub')
+  }
+
+  stages {
+      stage('Build Artifact') {
+            steps {
+              sh "mvn clean package -DskipTests=true"
+              archive 'target/*.jar'
+            }
+        } 
+      stage('Unit Tests - JUnit and Jacoco') {
+          steps {
+              sh "mvn test"
+          }
+          post {
+              always {
+                  junit 'target/surefire-reports/*.xml'
+                  jacoco execPattern: 'target/jacoco.exec'
+              }
+          }
+      }
+      stage('Docker image build and push') {
+          steps {
+              sh '''
+                echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin
+                docker build -t raziahmed/numeric-app:$GIT_COMMIT .
+                docker push raziahmed/numeric-app:$GIT_COMMIT
+                docker logout
+              '''
+          }
+      }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+pipeline {
+  agent any
 
   stages {
       stage('Build Artifact') {
@@ -31,5 +90,5 @@ pipeline {
       }
   }
 }
-  
+*/
   
