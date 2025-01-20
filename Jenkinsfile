@@ -22,7 +22,7 @@ pipeline {
       stage('Docker image build and push') {
 
       steps {
-        docker.withRegistry(registryUrl: "", registryCredentialsId:"docker-hub")
+        docker.withRegistry("","docker-hub")
           sh 'docker build -t raziahmed/numeric-app:""$GIT_COMMIT"" .'
           sh 'docker push raziahmed/numeric-app:""$GIT_COMMIT""'
       }
